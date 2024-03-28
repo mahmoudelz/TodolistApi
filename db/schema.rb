@@ -13,11 +13,11 @@
 ActiveRecord::Schema[7.1].define(version: 2024_03_26_133013) do
   create_table "tasks", force: :cascade do |t|
     t.string "title"
-    t.integer "todolists_id", null: false
+    t.integer "todolist_id", null: false
     t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["todolists_id"], name: "index_tasks_on_todolists_id"
+    t.index ["todolist_id"], name: "index_tasks_on_todolist_id"
   end
 
   create_table "todolists", force: :cascade do |t|
@@ -35,6 +35,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_133013) do
     t.datetime "updated_at", null: false
   end
 
-  add_foreign_key "tasks", "todolists", column: "todolists_id"
+  add_foreign_key "tasks", "todolists"
   add_foreign_key "todolists", "users"
 end

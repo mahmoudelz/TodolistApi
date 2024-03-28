@@ -38,6 +38,9 @@ gem "bootsnap", require: false
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mswin mswin64 mingw x64_mingw ]
+  gem 'rspec-rails'
+  gem 'byebug'
+
 end
 
 group :development do
@@ -48,3 +51,5 @@ end
 gem 'active_model_serializers', '~> 0.10.0'
 gem 'ransack'
 gem 'paranoia'
+gem 'byebug'
+gem 'factory_bot_rails'
