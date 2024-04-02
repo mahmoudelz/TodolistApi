@@ -1,34 +1,39 @@
-class TodolistStatus
-  # Define enum values as constants
-  ONGOING = :ongoing
-  DONE = :done
-
-  # Define an array of all enum values
-  VALUES = [ONGOING, DONE].freeze
-end
-
 class TodolistsController < ApplicationController
+  before_action :set_user, only: [:create]
+  before_action :set_todolist, only: [:show, :destroy, :update]
+
+  def index
+    # byebug
+    @q = Todolist.ransack(params[:q])
+    @todolists = @q.result(distinct: true)
+    render json: @todolists, status: :ok
+  end
 
   
-  def index
-    todolist = Todolist.all
-    render json: todolist, status: :created
+  def search
+    index
+    render :index
   end
 
   def show
-
-    todolist = Todolist.find(params[:id])
-    render json: todolist, status: :ok
-      
-    rescue ActiveRecord::RecordNotFound
-    render json: { error: "Todolist not found" }, status: :not_found
+    render json: @todolist, status: :ok
   end
 
   
-  def create    
-    user = User.create!(user_params)
-    todolist = Todolist.new(todolist_params.merge(user_id: user.id))
+  # def create  
+  #   user = User.create!(user_params)
+  #   todolist = Todolist.new(todolist_params.merge(user_id: user.id))
 
+  #   if todolist.save!
+  #     render json: todolist, status: :created
+  #   else
+  #     render json: todolist.errors, status: :unprocessable_entity
+  #   end
+  # end
+
+  def create 
+    
+    todolist = @user.todolists.new(todolist_params)
     if todolist.save!
       render json: todolist, status: :created
     else
@@ -38,22 +43,27 @@ class TodolistsController < ApplicationController
 
 
   def destroy
-    Todolist.find(params[:id]).destroy!
-    
-    head :no_content
+    @todolist.destroy!
   end
 
   def update
-    todolist = Todolist.find(params[:id])
-    if todolist.update(todolist_params)
-      render json: todolist, status: :ok
+    if @todolist.update(todolist_params)
+      render json: @todolist, status: :ok
     else
-      render json: todolist.errors, status: :unprocessable_entity
+      render json: @todolist.errors, status: :unprocessable_entity
     end
   end
   
   private
-  
+
+  def set_todolist
+    begin
+      @todolist = Todolist.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "Todolist not found" }, status: :not_found
+    end
+  end
+
   def user_params
     params.require(:users).permit(:name)
   end
@@ -61,4 +71,17 @@ class TodolistsController < ApplicationController
   def todolist_params
     params.require(:todolists).permit(:title)
   end
+
+  def set_user
+    @user = User.find_or_create_by(name: user_params[:name])
+  end
+
+  def ransearch
+    @query = Todolist.ransack("sample")
+    @todolists = @query.result(distinct: true)
+  end
+
+  # def set_user 
+  #   @user = User.find(params[:user_id])
+  # end
 end
