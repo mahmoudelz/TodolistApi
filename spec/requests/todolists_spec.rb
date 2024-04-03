@@ -93,7 +93,7 @@ require 'rails_helper'
       expect(response).to have_http_status(200)
       item_response = JSON.parse(response.body)
       expect(item_response['title']).to eq("This is the updated title")
-
+      
       end      
     end
   

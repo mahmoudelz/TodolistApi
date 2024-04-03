@@ -3,10 +3,12 @@ class TodolistsController < ApplicationController
   before_action :set_todolist, only: [:show, :destroy, :update]
 
   def index
-    # byebug
     @q = Todolist.ransack(params[:q])
     @todolists = @q.result(distinct: true)
     render json: @todolists, status: :ok
+
+    HardJob.perform_in(5.seconds)
+
   end
 
   
@@ -32,7 +34,6 @@ class TodolistsController < ApplicationController
   # end
 
   def create 
-    
     todolist = @user.todolists.new(todolist_params)
     if todolist.save!
       render json: todolist, status: :created

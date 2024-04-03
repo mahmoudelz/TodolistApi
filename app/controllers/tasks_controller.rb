@@ -1,20 +1,9 @@
-class TasklistStatus
-  # Define enum values as constants
-  WIP = :wip
-  COMPLETED = :completed
-
-  # Define an array of all enum values
-  VALUES = [WIP, COMPLETED].freeze
-end
-
 class TasksController < ApplicationController
-
-  before_action :set_todolist
+  # before_action :set_todolist, only: [:create]
   before_action :set_task, only: [:show, :update, :destroy]
 
   def index
-    tasks = @todolist.tasks
-    render json: tasks, status: :ok
+    render json: Task.all, status: :ok
   end
 
   def show
@@ -22,9 +11,8 @@ class TasksController < ApplicationController
   end
   
   def create
-    task = @todolist.tasks.new(task_params)
-      
-    if task.save
+    task = Task.new(task_params)
+    if task.save!
       render json: task, status: :created
     else
       render json: task.errors, status: :unprocessable_entity
@@ -32,8 +20,7 @@ class TasksController < ApplicationController
   end
 
   def destroy
-    @task.destroy
-    head :no_content
+    @task.destroy!
   end
 
   def update
@@ -46,16 +33,19 @@ class TasksController < ApplicationController
 
   private
 
-  def set_todolist
-    puts "Params: #{params.inspect}"
-     @todolist = Todolist.find(params[:todolist_id])
+  def set_task
+    begin
+      @task = Task.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "Task not found" }, status: :not_found
+    end
   end
 
-  def set_task
-    @task = @todolist.tasks.find(params[:id])
+  def set_todolist
+    @todolist = Todolist.find_or_create_by(title: todolist_params[:title])
   end
 
   def task_params
-    params.require(:task).permit(:title)
+    params.require(:tasks).permit(:title, :todolist_id)
   end
 end
